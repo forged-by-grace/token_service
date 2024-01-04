@@ -11,7 +11,7 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy the code files to the container
-COPY ./app ./app
+COPY . .
 
 # Start the container
 CMD [ "python", "main.py"]
