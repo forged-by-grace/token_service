@@ -1,7 +1,7 @@
 from aiokafka import AIOKafkaProducer
 from core.utils.settings import settings
 import uuid
-from core.helper.producer_helper import *
+from core.helper.producer_helper import topic_exists, create_topic
 
 
 async def produce_event(topic: str, value, key: str = str(uuid.uuid4()), headers: tuple | None = None) -> None:

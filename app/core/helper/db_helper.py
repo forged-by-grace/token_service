@@ -12,10 +12,10 @@ async def get_account_by_email(email: EmailStr):
     """
     
     # Filter
-    filter = {"email": email}
+    db_filter = {"email": email}
 
     # Query
-    response = await account_col.find_one(filter=filter)
+    response = await account_col.find_one(filter=db_filter)
 
     # Check if response is None
     if not response:
@@ -32,10 +32,10 @@ async def get_account_by_id(id: str):
     """
 
     # Filter
-    filter = {"_id": id}
+    db_filter = {"_id": id}
 
     # Query
-    response = await account_col.find_one(filter=filter)
+    response = await account_col.find_one(filter=db_filter)
 
     # Check if response is None
     if not response:
@@ -52,10 +52,10 @@ async def get_account_by_phone_number(phone_number: str):
     """
     
     # Filter
-    filter = {"phone_number": phone_number}
+    db_filter = {"phone_number": phone_number}
 
     # Query
-    response = await account_col.find_one(filter=filter)
+    response = await account_col.find_one(filter=db_filter)
 
     # Check if response is None
     if not response:

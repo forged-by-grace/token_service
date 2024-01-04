@@ -1,5 +1,5 @@
 # Start the official python base image
-FROM python:3.9
+FROM python:3.11
 
 # Create a new directory in the container image
 WORKDIR /app
