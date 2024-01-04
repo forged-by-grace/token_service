@@ -3,6 +3,9 @@ from core.utils.settings import settings
 from core.utils.init_log import logger
 from core.helper.token_helper import AssignToken, assign_token, ReusedToken, RevokeToken, invalidate_account_tokens, send_threat_notification, update_refresh_token, UpdateToken, revoke_refresh_token
 
+# Processing event msg
+event_processing_msg = "Processing event"
+
 
 async def consume_assign_token_event():
     # consume event
@@ -16,7 +19,7 @@ async def consume_assign_token_event():
             assign_token_data = AssignToken.deserialize(data=msg.value)
             
             # Assign token
-            logger.info('Processing event.')
+            logger.info(event_processing_msg)
             await assign_token(data = assign_token_data)
     except Exception as err:
         logger.error(f'Failed to process event due to error: {str(err)}')
@@ -37,7 +40,7 @@ async def consume_reused_refresh_token_event():
             account_data = ReusedToken.deserialize(data=msg.value)
             
             # invalidate token
-            logger.info('Processing event.')
+            logger.info(event_processing_msg)
             await invalidate_account_tokens(id=account_data.id)
             
             # Notify account owner of threat
@@ -61,7 +64,7 @@ async def consume_update_token_event():
             update_token_data = UpdateToken.deserialize(data=msg.value)
             
             # update token
-            logger.info('Processing event.')
+            logger.info(event_processing_msg)
             await update_refresh_token(data=update_token_data)
     except Exception as err:
         logger.error(f'Failed to process event due to error: {str(err)}')
@@ -82,7 +85,7 @@ async def consume_revoke_token_event():
             revoke_token_data = RevokeToken.deserialize(data=msg.value)
             
             # revoke token
-            logger.info('Processing event.')
+            logger.info(event_processing_msg)
             await revoke_refresh_token(data=revoke_token_data)
     except Exception as err:
         logger.error(f'Failed to process event due to error: {str(err)}')
