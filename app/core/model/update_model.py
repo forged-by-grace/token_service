@@ -1,6 +1,6 @@
 from dataclasses_avroschema.pydantic import AvroBaseModel
 from pydantic import Field
-from typing import Dict, Optional, List
+from typing import Dict, List
 from datetime import datetime
 from core.utils.settings import settings
 

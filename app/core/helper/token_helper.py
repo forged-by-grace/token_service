@@ -1,5 +1,6 @@
 from core.model.update_model import UpdateFieldAvro, UpdateAvro
-from core.model.token_models import AssignToken, UpdateToken, RevokeToken, AddDevice
+from core.model.token_models import AssignToken, UpdateToken, RevokeToken
+from core.model.device_model import AddDevice
 from core.model.notification_avro_model import Notification
 
 from core.enums.token_enum import NotificationChannel, NotificationTemplate, Role
