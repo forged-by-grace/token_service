@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonarqube-scanner'
+    }
+    stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'main', url: 'https://github.com/forged-by-grace/token_service.git'
+            }
+        }
+        stage("Sonarqube Analysis") {
+            steps {
+                withSonarQubeEnv('SonarQube-Server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=token-microservice \
+                    -Dsonar.projectKey=token-microservice'''
+                }
+            }
+        }
+        stage("Quality Gate") {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonarqube-token'
+                }
+            }
+        }
+       
+        stage('TRIVY FS SCAN') {
+             steps {
+                 sh "trivy fs . > trivyfs.txt"
+             }
+         }
+         stage("Docker Build & Push"){
+             steps{
+                 script{
+                   withDockerRegistry(credentialsId: 'jenkins-docker-token', toolName: 'docker'){   
+                      sh "docker build -t token-handler ./app"
+                      sh "docker tag token-handler conano/token-handler:latest "
+                      sh "docker push conano/token-handler:latest "
+                    }
+                }
+            }
+        }
+        stage("TRIVY Image Scan"){
+            steps{
+                sh "trivy image conano/token-handler:latest > trivyimage.txt" 
+            }
+        }
+         
+    }  
+    post {
+     always {
+        emailext attachLog: true,
+            subject: "'${currentBuild.result}'",
+            body: "Project: ${env.JOB_NAME}<br/>" +
+                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                "URL: ${env.BUILD_URL}<br/>",
+            to: 'conanosystems@gmail.com',                              
+            attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+        }
+    }
+}
