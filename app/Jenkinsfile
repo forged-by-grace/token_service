@@ -3,20 +3,24 @@ pipeline {
     tools {
         jdk 'jdk17'
     }
+
     environment {
         SCANNER_HOME = tool 'sonarqube-scanner'
     }
+    
     stages {
         stage('clean workspace') {
             steps {
                 cleanWs()
             }
         }
+
         stage('Checkout from Git') {
             steps {
                 git branch: 'main', url: 'https://github.com/forged-by-grace/token_service.git'
             }
         }
+
         stage("Sonarqube Analysis") {
             steps {
                 withSonarQubeEnv('SonarQube-Server') {
@@ -25,6 +29,7 @@ pipeline {
                 }
             }
         }
+
         stage("Quality Gate") {
             steps {
                 script {
@@ -38,7 +43,7 @@ pipeline {
                  sh "trivy fs . > trivyfs.txt"
              }
          }
-         
+
          stage("Docker Build & Push"){
              steps{
                  script{
