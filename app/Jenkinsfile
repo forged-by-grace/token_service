@@ -28,7 +28,7 @@ pipeline {
         stage("Quality Gate") {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonarqube-token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'SonarQube-Token'
                 }
             }
         }
@@ -38,6 +38,7 @@ pipeline {
                  sh "trivy fs . > trivyfs.txt"
              }
          }
+         
          stage("Docker Build & Push"){
              steps{
                  script{
