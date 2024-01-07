@@ -5,9 +5,15 @@ pipeline {
     }
 
     environment {
+        APP_NAME = "register-app-pipeline"
+        RELEASE = "1.0.0"
+        DOCKER_USER = "conano"
+        DOCKER_PASS = 'dockerhub'
+        IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
+        IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
         SCANNER_HOME = tool 'sonarqube-scanner'
     }
-    
+
     stages {
         stage('clean workspace') {
             steps {
@@ -46,20 +52,33 @@ pipeline {
 
          stage("Docker Build & Push"){
              steps{
-                 script{
-                   withDockerRegistry(credentialsId: 'jenkins-docker-token', toolName: 'docker'){   
-                      sh "docker build -t token-handler ./app"
-                      sh "docker tag token-handler conano/token-handler:latest "
-                      sh "docker push conano/token-handler:latest "
+                 script {
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image = docker.build "${IMAGE_NAME}"
+                    }
+
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image.push("${IMAGE_TAG}")
+                        docker_image.push('latest')
                     }
                 }
             }
         }
+       
         stage("TRIVY Image Scan"){
             steps{
                 sh "trivy image conano/token-handler:latest > trivyimage.txt" 
             }
         }
+
+        stage ('Cleanup Artifacts') {
+           steps {
+               script {
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker rmi ${IMAGE_NAME}:latest"
+               }
+          }
+       }
          
     }  
     post {
