@@ -53,13 +53,12 @@ pipeline {
          stage("Docker Build & Push"){
              steps{
                  script{
-                   docker.withRegistry('',DOCKER_PASS) {
-                        docker_image = docker.build "${IMAGE_NAME} ./app"
-                    }
-
-                    docker.withRegistry('',DOCKER_PASS) {
-                        docker_image.push("${IMAGE_TAG}")
-                        docker_image.push('latest')
+                   withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker'){   
+                      sh "docker build -t ${APP_NAME} ./app"
+                      sh "docker tag ${APP_NAME} ${IMAGE_NAME}:latest "
+                      sh "docker tag ${APP_NAME} ${IMAGE_NAME}:${IMAGE_TAG} "
+                      sh "docker push ${IMAGE_NAME}:latest "
+                      sh "docker push ${IMAGE_NAME}:${IMAGE_TAG} "
                     }
                 }
             }
@@ -70,8 +69,16 @@ pipeline {
                 sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt" 
             }
         }
-         
+        stage ('Cleanup Artifacts') {
+           steps {
+               script {
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker rmi ${IMAGE_NAME}:latest"
+               }
+          }
+       }         
     }  
+    
     post {
      always {
         emailext attachLog: true,
