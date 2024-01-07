@@ -53,17 +53,21 @@ pipeline {
          stage("Docker Build & Push"){
              steps{
                  script{
-                   withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker'){   
-                      sh "docker build -t token-handler ./app"
-                      sh "docker tag token-handler conano/token-handler:latest "
-                      sh "docker push conano/token-handler:latest "
+                   docker.withRegistry('',DOCKER_PASS) {
+                        docker_image = docker.build "${IMAGE_NAME}"
+                    }
+
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image.push("${IMAGE_TAG}")
+                        docker_image.push('latest')
                     }
                 }
             }
         }
+
         stage("TRIVY Image Scan"){
             steps{
-                sh "trivy image conano/token-handler:latest > trivyimage.txt" 
+                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt" 
             }
         }
          
